@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+    <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+            <link rel="shortcut icon" href="" />
+            <title>Trigonometry</title>
+            <style>
+                .mainDiv {
+                    left:50%;
+                    top:0px;
+                    width:468px;
+                    min-width:468px;
+                    max-width:468px;
+                    margin-left:-234px;
+                    position:relative;
+                    overflow:hidden;
+                }
+                .scoreTitleDiv {
+                    right: 0px;
+                    top:0px;
+                    width:108px;
+                    height:80px;
+                    position:absolute;
+                    border:1px solid #000000;
+                    overflow:hidden;
+                    padding:10px;
+                }
+                .scoreDiv {
+                    right: 0px;
+                    top:101px;
+                    width:108px;
+                    height:204px;
+                    position:absolute;
+                    border:1px solid #000000;
+                    overflow:auto;
+                    padding:10px;
+                }
+                canvas {
+                    border:1px solid #000000;
+                    left:0px;
+                    width:325px;
+                    height:325px;
+                    position:absolute;
+                }
+                .placeholder {
+                    left:0px;
+                    top:0px;
+                    width:468px;
+                    height:325px;
+                    position:relative;
+                    
+                }
+                input {
+                    position:relative;
+                }
+                .right {
+                    color:green;
+                }
+                .false {
+                    color:red;
+                }
+                #sinButton {
+                    border:1px solid #000000;
+                    left:0px;
+                    width:33%;
+                    height:64px;
+                    position:relative;
+                }
+                #cosButton {
+                    border:1px solid #000000;
+                    left:33%;
+                    width:34%;
+                    height:64px;
+                    position:absolute;
+                }
+                #tanButton {
+                    border:1px solid #000000;
+                    left:67%;
+                    width:33%;
+                    height:64px;
+                    position:absolute;
+                }
+            </style>
+    </head>
+    <body>
+        <div class="mainDiv">
+            <canvas id="c" width="325" height="325"></canvas>
+            <br>
+            <div id="scoreTitleDiv" class="scoreTitleDiv">
+                Score:<br>
+                    sin(<span class="right" id="sinR">0</span>/<span class="false" id="sinF">0</span>)<br>
+                    cos(<span class="right" id="cosR">0</span>/<span class="false" id="cosF">0</span>)<br>
+                    tan(<span class="right" id="tanR">0</span>/<span class="false" id="tanF">0</span>)
+                
+            </div>
+            <div id="scoreDiv" class="scoreDiv"></div>
+            <div class="placeholder"></div>
+            <button id="sinButton" onclick="choose(1)">Sinus<br>(Key: 1)</button>
+            <button id="cosButton" onclick="choose(2)">Cosinus<br>(Key: 2)</button>
+            <button id="tanButton" onclick="choose(3)">Tangens<br>(Key: 3)</button>
+            <br>
+            <p>
+                How it works: Tell, what kind of function is shown in the screen.
+            </p>
+            <p>
+                Settings:<br>
+                Normal color: <input id="normalColorInput" type="text" value="lightgrey"><br>
+                Selected color: <input id="selectedColorInput" type="text" value="blue"><br>
+                Stroke width: <input id="strokeWidthInput" type="text" value="3"><br>
+            </p>
+            <br>
+        </div>
+            <script>
+                class Point {
+                    constructor(x,y) {
+                        this.x = x;
+                        this.y = y;
+                    }
+                }
+                var c = document.getElementById("c");
+                var ctx = c.getContext("2d");
+                var cWidth = ctx.canvas.width;
+                var cHeight = ctx.canvas.height;
+
+                var sinScore = [0,0];
+                var cosScore = [0,0];
+                var tanScore = [0,0];
+
+                var pA = new Point(0,0);
+                var pB = new Point(0,0);
+                var pC = new Point(0,0);
+                var pRADot = new Point(0,0);
+
+                var cLen = 300;
+                var aLen = 0;
+                var bLen = 0;
+
+                var angleRadius = 30;
+                var rADotRadius = 2;
+                
+                var minAlpha = 15;
+
+                var selectedAngle = 0;
+                var disselectedSite = 0;
+
+                var normalColor = document.getElementById("normalColorInput").value;
+                var selectedColor = document.getElementById("selectedColorInput").value;
+                var lineWidth = document.getElementById("strokeWidthInput").value;
+
+                drawTriangle();
+
+                window.addEventListener("keydown", function(e) {
+                    var event = e.keyCode;
+                    switch (event) {
+                        case 49:
+                            choose(1);
+                            break;
+                        case 50:
+                            choose(2);
+                            break;
+                        case 51:
+                            choose(3);
+                            break;
+                    }
+                });
+
+                function choose(sel) {
+                    var solution = 0;
+                    if (disselectedSite == 3) {
+                        solution = 3;
+                    } else if (disselectedSite == 2) {
+                        if (selectedAngle == 1) {
+                            solution = 1;
+                        } else {
+                            solution = 2;
+                        }
+                    } else if (disselectedSite == 1) {
+                        if (selectedAngle == 1) {
+                            solution = 2;
+                        } else {
+                            solution = 1;
+                        }
+                    }
+                    if (sel == solution) {
+                        switch(sel) {
+                            case 1:
+                                sinScore[0]++;
+                                document.getElementById("scoreDiv").innerHTML =  "<small><span class='right'>Sinus was right!</span></small><br>"+document.getElementById("scoreDiv").innerHTML;
+                                break;
+                            case 2:
+                                cosScore[0]++;
+                                document.getElementById("scoreDiv").innerHTML =  "<small><span class='right'>Cosinus was right!</span></small><br>"+document.getElementById("scoreDiv").innerHTML;
+                                break;
+                            case 3:
+                                tanScore[0]++;
+                                document.getElementById("scoreDiv").innerHTML =  "<small><span class='right'>Tangens was right!</span></small><br>"+document.getElementById("scoreDiv").innerHTML;
+                                break;
+                        }
+                    } else {
+                        switch(solution) {
+                            case 1:
+                                sinScore[1]--;
+                                document.getElementById("scoreDiv").innerHTML =  "<small><span class='false'>False! It was a Sinus!</span></small><br>"+document.getElementById("scoreDiv").innerHTML;
+                                break;
+                            case 2:
+                                cosScore[1]--;
+                                document.getElementById("scoreDiv").innerHTML =  "<small><span class='false'>False! It was a Cosinus!</span></small><br>"+document.getElementById("scoreDiv").innerHTML;
+                                break;
+                            case 3:
+                                tanScore[1]--;
+                                document.getElementById("scoreDiv").innerHTML =  "<small><span class='false'>False! It was a Tangens!</span></small><br>"+document.getElementById("scoreDiv").innerHTML;
+                                break;
+                        }
+                    }
+                    setupScores();
+                    drawTriangle();
+                }
+
+                function setupScores() {
+                    document.getElementById("sinR").innerHTML = sinScore[0];
+                    document.getElementById("sinF").innerHTML = sinScore[1];
+                    document.getElementById("cosR").innerHTML = cosScore[0];
+                    document.getElementById("cosF").innerHTML = cosScore[1];
+                    document.getElementById("tanR").innerHTML = tanScore[0];
+                    document.getElementById("tanF").innerHTML = tanScore[1];
+                }
+
+                function drawTriangle() {
+
+                    normalColor = document.getElementById("normalColorInput").value;
+                    selectedColor = document.getElementById("selectedColorInput").value;
+                    lineWidth = document.getElementById("strokeWidthInput").value;
+
+                    var angle = rand(0,2*Math.PI);
+                    var alpha = rand(Math.PI/180*minAlpha,Math.PI/180*(90-minAlpha));
+                    pB.x = cWidth/2+(cLen/2)*Math.cos(angle);
+                    pB.y = cHeight/2+(cLen/2)*Math.sin(angle);
+                    pA.x = cWidth/2-(cLen/2)*Math.cos(angle);
+                    pA.y = cHeight/2-(cLen/2)*Math.sin(angle);
+
+                    bLen = Math.cos(alpha)*cLen;
+                    aLen = Math.sin(alpha)*cLen;
+
+                    pC.x = pA.x+bLen*Math.cos(alpha+angle);
+                    pC.y = pA.y+bLen*Math.sin(alpha+angle);
+
+                    pRADot.x = pC.x+angleRadius/2*Math.cos(alpha+angle+Math.PI*1.25);
+                    pRADot.y = pC.y+angleRadius/2*Math.sin(alpha+angle+Math.PI*1.25);
+
+                    selectedAngle = Math.round(rand(1,2));
+                    disselectedSite = Math.round(rand(1,3));
+
+                    clearCanvas();
+                    ctx.lineWidth = lineWidth;
+                    ctx.strokeStyle = normalColor;
+                    ctx.fillStyle = normalColor;
+                    ctx.beginPath();
+                    ctx.moveTo(pA.x,pA.y);
+                    ctx.lineTo(pB.x,pB.y);
+                    ctx.lineTo(pC.x,pC.y);
+                    ctx.lineTo(pA.x,pA.y);
+                    ctx.stroke();
+                    //c
+                    if (disselectedSite != 3) {
+                        ctx.strokeStyle = selectedColor;
+                        ctx.fillStyle = selectedColor;
+                        ctx.beginPath();
+                        ctx.moveTo(pA.x,pA.y);
+                        ctx.lineTo(pB.x,pB.y);
+                        ctx.stroke();
+                    } else {
+                        ctx.strokeStyle = normalColor;
+                        ctx.fillStyle = normalColor;
+                    }
+                    //a
+                    if (disselectedSite != 1) {
+                        ctx.strokeStyle = selectedColor;
+                        ctx.fillStyle = selectedColor;
+                        ctx.beginPath();
+                        ctx.moveTo(pB.x,pB.y);
+                        ctx.lineTo(pC.x,pC.y);
+                        ctx.stroke();
+                    }
+                    //b
+                    if (disselectedSite != 2) {
+                        ctx.strokeStyle = selectedColor;
+                        ctx.fillStyle = selectedColor;
+                        ctx.beginPath();
+                        ctx.moveTo(pC.x,pC.y);
+                        ctx.lineTo(pA.x,pA.y);
+                        ctx.stroke();
+                    }
+                    //90°
+                    ctx.beginPath();
+                    ctx.strokeStyle = normalColor;
+                    ctx.fillStyle = normalColor;
+                    ctx.arc(pC.x,pC.y,angleRadius,angle+alpha+Math.PI/2-Math.PI,angle+alpha-Math.PI,true);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.strokeStyle = normalColor;
+                    ctx.fillStyle = normalColor;
+                    ctx.arc(pRADot.x, pRADot.y, rADotRadius, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke(); 
+                    //alpha
+                    ctx.beginPath();
+                    ctx.arc(pA.x,pA.y,angleRadius/Math.sin(alpha),angle,angle+alpha);
+                    if (selectedAngle == 1) {
+                        ctx.strokeStyle = selectedColor;
+                        ctx.fillStyle = selectedColor;
+                    } else {
+                        ctx.strokeStyle = normalColor;
+                        ctx.fillStyle = normalColor;
+                    }
+                    ctx.stroke();
+                    //beta
+                    ctx.beginPath();
+                    ctx.arc(pB.x,pB.y,angleRadius/Math.cos(alpha),angle+Math.PI-(Math.PI/2-alpha),angle+Math.PI+(Math.PI/2-alpha)-(Math.PI/2-alpha),false);
+                    if (selectedAngle == 2) {
+                        ctx.strokeStyle = selectedColor;
+                        ctx.fillStyle = selectedColor;
+                    } else {
+                        ctx.strokeStyle = normalColor;
+                        ctx.fillStyle = normalColor;
+                    }
+                    ctx.stroke();
+                }
+                function rand(min, max) {
+                    return Math.random() * (max - min) + min;
+                }
+                function clearCanvas() { 
+                    ctx.beginPath(); 
+                    ctx.clearRect(0, 0, cWidth, cHeight); 
+                }
+
+            </script>
+    </body>
+</html>
